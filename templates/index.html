@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Analisis Keselamatan Jalan UK{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section id="home" class="hero-section bg-gradient-primary text-white py-5 mb-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold mb-3" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                    Analisis Pengaruh Faktor Lingkungan terhadap Tingkat Keselamatan Jalan di Inggris
+                </h1>
+                <p class="lead mb-4" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">
+                    Visualisasi interaktif data UK Co-Benefits Atlas yang menganalisis lima faktor utama: 
+                    <strong>Kemacetan, Kondisi Jalan, Kualitas Udara, Aktivitas Fisik, dan Kebisingan</strong>
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <button class="btn btn-light btn-lg" onclick="scrollToSection('map-section')">
+                        <i class="fas fa-map-marked-alt me-2"></i>Lihat Peta
+                    </button>
+                    <button class="btn btn-outline-light btn-lg" onclick="scrollToSection('charts-section')">
+                        <i class="fas fa-chart-line me-2"></i>Lihat Grafik
+                    </button>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center mt-4 mt-lg-0">
+                <i class="fas fa-road fa-6x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Cards -->
+<section class="stats-section mb-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="card stats-card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="stats-icon mb-3">
+                            <i class="fas fa-calendar-alt fa-2x text-primary"></i>
+                        </div>
+                        <h3 class="h2 mb-1">{{ max_year - min_year + 1 }}</h3>
+                        <p class="text-muted mb-0">Tahun Data</p>
+                        <small class="text-muted">({{ min_year }}-{{ max_year }})</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card stats-card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="stats-icon mb-3">
+                            <i class="fas fa-map-marker-alt fa-2x text-success"></i>
+                        </div>
+                        <h3 class="h2 mb-1">{{ local_authorities|length }}</h3>
+                        <p class="text-muted mb-0">Local Authority</p>
+                        <small class="text-muted">Area di UK</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card stats-card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="stats-icon mb-3">
+                            <i class="fas fa-chart-bar fa-2x text-warning"></i>
+                        </div>
+                        <h3 class="h2 mb-1">{{ benefit_types|length }}</h3>
+                        <p class="text-muted mb-0">Faktor Analisis</p>
+                        <small class="text-muted">Parameter Utama</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card stats-card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="stats-icon mb-3">
+                            <i class="fas fa-flag fa-2x text-info"></i>
+                        </div>
+                        <h3 class="h2 mb-1">{{ nations|length }}</h3>
+                        <p class="text-muted mb-0">Negara Bagian</p>
+                        <small class="text-muted">di UK</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section id="map-section" class="mb-5">
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-map me-2"></i>Peta Choropleth Interaktif
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <!-- Map Controls -->
+                <div class="p-3 bg-light border-bottom">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Tahun:</label>
+                            <select id="yearSelect" class="form-select">
+                                {% for year in years %}
+                                <option value="{{ year }}" {% if year == default_year %}selected{% endif %}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Faktor:</label>
+                            <select id="factorSelect" class="form-select">
+                                {% for bt_key, bt_config in benefit_configs.items() %}
+                                <option value="{{ bt_key }}" data-color="{{ bt_config.color }}" {% if bt_key == selected_map_benefit_type %}selected{% endif %}>
+                                    {{ bt_config.label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Daerah:</label>
+                            <select id="areaSelect" class="form-select">
+                                <option value="">-- Pilih untuk fokus --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button id="focusBtn" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i>Fokus
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="alert alert-info py-2 mb-0">
+                                <small>
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <strong>Skema Warna Faktor:</strong>
+                                    <span class="ms-2" style="color: #4CAF50;"><i class="fas fa-square me-1"></i>Kualitas Udara (Hijau)</span>
+                                    <span class="ms-2" style="color: #FF9800;"><i class="fas fa-square me-1"></i>Kemacetan (Orange)</span>
+                                    <span class="ms-2" style="color: #9C27B0;"><i class="fas fa-square me-1"></i>Kebisingan (Ungu)</span>
+                                    <span class="ms-2" style="color: #FFC107;"><i class="fas fa-square me-1"></i>Aktivitas Fisik (Kuning)</span>
+                                    <span class="ms-2" style="color: #2196F3;"><i class="fas fa-square me-1"></i>Kondisi Jalan (Biru)</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Map Container -->
+                <div id="map" style="height: 600px;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Charts Section -->
+<section id="charts-section" class="mb-5">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-3">
+                    <i class="fas fa-chart-line me-2"></i>Analisis Tren dan Grafik
+                </h2>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <label class="form-label fw-bold">Pilih Area:</label>
+                        <select id="chart-la-select" class="form-select">
+                            <option value="">-- Pilih Local Authority --</option>
+                            {% for la in local_authorities %}
+                            <option value="{{ la }}">{{ la }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <label class="form-label fw-bold">Faktor untuk Grafik:</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for bt_key, bt_config in benefit_configs.items() %}
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input chart-benefit-checkbox" type="checkbox" 
+                                       id="chart-{{ bt_key }}" value="{{ bt_key }}" checked>
+                                <label class="form-check-label" for="chart-{{ bt_key }}" style="color: {{ bt_config.color }}">
+                                    <i class="fas {{ bt_config.icon }} me-1"></i>{{ bt_config.label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Tren Temporal</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Perbandingan Faktor</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Correlation Section -->
+<section id="correlation-section" class="mb-5">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-3">
+                    <i class="fas fa-project-diagram me-2"></i>Analisis Korelasi Antar Faktor
+                </h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <label class="form-label fw-bold">Filter Tahun (Opsional):</label>
+                        <select id="correlation-year-select" class="form-select">
+                            <option value="">Semua Tahun</option>
+                            {% for year in years %}
+                            <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                        <button id="update-correlation-btn" class="btn btn-primary w-100 mt-3">
+                            <i class="fas fa-sync me-2"></i>Update Korelasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning">
+                        <h6 class="mb-0"><i class="fas fa-network-wired me-2"></i>Matriks Korelasi</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="correlationChart"></canvas>
+                        <div class="mt-3 p-2 bg-light rounded">
+                            <small class="d-block mb-2"><strong>Keterangan Warna Korelasi:</strong></small>
+                            <div class="row g-2">
+                                <div class="col-auto">
+                                    <span class="badge" style="background-color: #d32f2f;">Kuat Positif (≥0.7)</span>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge" style="background-color: #ff9800;">Sedang Positif (0.3-0.7)</span>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge" style="background-color: #ffeb3b; color: #333;">Lemah (-0.3 hingga 0.3)</span>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge" style="background-color: #42a5f5;">Sedang Negatif (-0.7 hingga -0.3)</span>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge" style="background-color: #1565c0;">Kuat Negatif (≤-0.7)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Heatmap Section -->
+<section id="heatmap-section" class="mb-5">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-3">
+                    <i class="fas fa-th me-2"></i>Heatmap: Distribusi Spasial-Temporal
+                </h2>
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Faktor:</label>
+                                <select id="heatmap-benefit-select" class="form-select">
+                                    {% for bt_key, bt_config in benefit_configs.items() %}
+                                    <option value="{{ bt_key }}">{{ bt_config.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Tahun Awal:</label>
+                                <select id="heatmap-year-start" class="form-select">
+                                    {% for year in years %}
+                                    <option value="{{ year }}" {% if year == min_year %}selected{% endif %}>{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Tahun Akhir:</label>
+                                <select id="heatmap-year-end" class="form-select">
+                                    {% for year in years %}
+                                    <option value="{{ year }}" {% if year == max_year %}selected{% endif %}>{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button id="update-heatmap-btn" class="btn btn-primary w-100">
+                                    <i class="fas fa-sync me-2"></i>Update Heatmap
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0"><i class="fas fa-fire me-2"></i>Peta Panas Data</h6>
+                    </div>
+                    <div class="card-body" style="overflow-x: auto;">
+                        <canvas id="heatmapChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Top Areas Section -->
+<section id="top-areas-section" class="mb-5">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-3">
+                    <i class="fas fa-trophy me-2"></i>Area dengan Nilai Tertinggi/Terendah
+                </h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="fas fa-arrow-up me-2"></i>Top 10 Area Tertinggi</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="topAreasChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0"><i class="fas fa-arrow-down me-2"></i>Top 10 Area Terendah</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="bottomAreasChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Configuration Script -->
+<script>
+    const config = {
+        currentYear: {{ default_year }},
+        minYear: {{ min_year }},
+        maxYear: {{ max_year }},
+        matchingProperty: '{{ matching_property }}',
+        benefitTypes: {{ benefit_types | tojson }},
+        benefitConfigs: {{ benefit_configs | tojson }},
+        selectedMapBenefitType: '{{ selected_map_benefit_type }}'
+    };
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}
