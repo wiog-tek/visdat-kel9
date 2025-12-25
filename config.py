@@ -50,13 +50,13 @@ class Config:
         },
         'physical_activity': {
             'label': 'Aktivitas Fisik',
-            'color': '#2196F3',
+            'color': '#FFC107',
             'icon': 'fa-running',
             'description': 'Manfaat dari peningkatan aktivitas fisik'
         },
         'road_repairs': {
             'label': 'Kondisi Jalan',
-            'color': '#F44336',
+            'color': '#2196F3',
             'icon': 'fa-road',
             'description': 'Biaya perbaikan dan kondisi jalan'
         }
