@@ -11,6 +11,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Google Fonts - Script Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
@@ -24,11 +27,11 @@
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-chart-line me-2"></i>
-                UK Co-Benefits Atlas
+            <a class="navbar-brand d-flex align-items-center" href="/" style="height: 100%;">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="UK Co-Benefits Atlas" height="40" class="me-2">
+                <span style="font-family: 'Dancing Script', cursive; font-weight: 700; font-style: italic; font-size: 1.5rem; line-height: 1; display: flex; align-items: center;">UK Co-Benefits Atlas</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -36,22 +39,22 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#map-section">
+                        <a class="nav-link" href="#map-section" style="color: #ffffff !important; text-shadow: 0 0 5px rgba(255,255,255,0.5);">
                             <i class="fas fa-map me-1"></i>Peta
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#charts-section">
+                        <a class="nav-link" href="#charts-section" style="color: #ffffff !important; text-shadow: 0 0 5px rgba(255,255,255,0.5);">
                             <i class="fas fa-chart-bar me-1"></i>Grafik
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#correlation-section">
+                        <a class="nav-link" href="#correlation-section" style="color: #ffffff !important; text-shadow: 0 0 5px rgba(255,255,255,0.5);">
                             <i class="fas fa-project-diagram me-1"></i>Korelasi
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#heatmap-section">
+                        <a class="nav-link" href="#heatmap-section" style="color: #ffffff !important; text-shadow: 0 0 5px rgba(255,255,255,0.5);">
                             <i class="fas fa-th me-1"></i>Heatmap
                         </a>
                     </li>
@@ -66,7 +69,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
+    <footer class="text-white py-4 mt-5" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
         <div class="container text-center">
             <p class="mb-2">
                 <strong>Analisis Pengaruh Faktor Lingkungan terhadap Tingkat Keselamatan Jalan di Inggris</strong>

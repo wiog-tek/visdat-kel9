@@ -4,14 +4,14 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section id="home" class="hero-section bg-gradient-primary text-white py-5 mb-4">
-    <div class="container">
+<section id="home" class="hero-section text-white py-5 mb-4" style="background: url('/static/images/background.png') no-repeat center center; background-size: cover; position: relative;">
+    <div class="container" style="position: relative; z-index: 2;">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h1 class="display-5 fw-bold mb-3" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                <h1 class="display-5 fw-bold mb-3" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
                     Analisis Pengaruh Faktor Lingkungan terhadap Tingkat Keselamatan Jalan di Inggris
                 </h1>
-                <p class="lead mb-4" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">
+                <p class="lead mb-4" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.7);">
                     Visualisasi interaktif data UK Co-Benefits Atlas yang menganalisis lima faktor utama: 
                     <strong>Kemacetan, Kondisi Jalan, Kualitas Udara, Aktivitas Fisik, dan Kebisingan</strong>
                 </p>
@@ -24,11 +24,10 @@
                     </button>
                 </div>
             </div>
-            <div class="col-lg-4 text-center mt-4 mt-lg-0">
-                <i class="fas fa-road fa-6x opacity-75"></i>
-            </div>
         </div>
     </div>
+    <!-- Overlay for better text readability -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 1;"></div>
 </section>
 
 <!-- Stats Cards -->
@@ -91,7 +90,7 @@
 <section id="map-section" class="mb-5">
     <div class="container-fluid">
         <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
                 <h5 class="card-title mb-0">
                     <i class="fas fa-map me-2"></i>Peta Choropleth Interaktif
                 </h5>
